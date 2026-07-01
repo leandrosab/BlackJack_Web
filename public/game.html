@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>♠ Blackjack Royale — Tisch</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">Blackjack Royale</div>
+    <div class="nav">
+      <span class="user-tag" id="me-name">…</span>
+      <span class="credits" id="me-credits">0</span>
+      <button class="btn small" id="btn-back">← Lobby</button>
+    </div>
+  </header>
+
+  <main class="table-wrap">
+    <div class="table-grid">
+      <div class="felt">
+        <div class="table-title" id="table-title">Blackjack</div>
+        <div class="table-subtitle" id="table-subtitle">3:2 Auszahlung · Dealer zieht bis 17</div>
+
+        <div class="dealer-area">
+          <div class="dealer-label">Dealer</div>
+          <div class="dealer-cards" id="dealer-cards"></div>
+          <div class="hand-score" id="dealer-score">–</div>
+        </div>
+
+        <div class="players-area" id="players-area"></div>
+
+        <div class="action-bar">
+          <div class="phase-info" id="phase-info">Verbinde…</div>
+          <div class="bet-controls hidden" id="bet-controls">
+            <div class="chip c10" data-chip="10">10</div>
+            <div class="chip c25" data-chip="25">25</div>
+            <div class="chip c50" data-chip="50">50</div>
+            <div class="chip c100" data-chip="100">100</div>
+            <div class="chip c250" data-chip="250">250</div>
+            <div class="bet-total"><span id="bet-total">0</span> Credits</div>
+            <button class="btn small ghost" id="btn-clear-bet">Zurücksetzen</button>
+            <button class="btn primary small" id="btn-place-bet">Setzen</button>
+          </div>
+          <div class="actions hidden" id="turn-actions">
+            <button class="btn primary" data-action="hit">Karte (Hit)</button>
+            <button class="btn" data-action="stand">Passen (Stand)</button>
+            <button class="btn" data-action="double">Verdoppeln</button>
+          </div>
+        </div>
+      </div>
+
+      <aside class="side">
+        <div class="card chat-card">
+          <h2>Chat & Log</h2>
+          <div class="chat-log" id="chat-log"></div>
+          <div class="chat-input">
+            <input id="chat-input" placeholder="Nachricht…" maxlength="200" />
+            <button class="btn small primary" id="chat-send">Senden</button>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </main>
+
+  <div class="toast" id="toast"></div>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/js/game.js"></script>
+</body>
+</html>

@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>♠ Blackjack Royale — Anmelden</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+  <div class="auth-wrap">
+    <div class="hero-cards">
+      <div class="deco"></div>
+      <div class="deco"></div>
+      <div class="deco"></div>
+      <div class="deco"></div>
+    </div>
+
+    <div class="auth-card">
+      <h1 class="auth-title">Blackjack Royale</h1>
+      <p class="auth-subtitle">Spiele Blackjack online mit Freunden — mit Fake-Credits.</p>
+
+      <div class="tabs">
+        <div class="tab active" data-tab="login">Anmelden</div>
+        <div class="tab" data-tab="register">Registrieren</div>
+      </div>
+
+      <div class="form-error" id="err"></div>
+
+      <form id="login-form">
+        <div class="field">
+          <label for="l-username">Benutzername</label>
+          <input id="l-username" type="text" autocomplete="username" required />
+        </div>
+        <div class="field">
+          <label for="l-password">Passwort</label>
+          <input id="l-password" type="password" autocomplete="current-password" required />
+        </div>
+        <button class="btn primary" style="width:100%; margin-top: 4px;" type="submit">Los geht's ♠</button>
+      </form>
+
+      <form id="register-form" class="hidden">
+        <div class="field">
+          <label for="r-username">Benutzername (3-16 Zeichen)</label>
+          <input id="r-username" type="text" autocomplete="username" required minlength="3" maxlength="16" />
+        </div>
+        <div class="field">
+          <label for="r-password">Passwort (min. 6 Zeichen)</label>
+          <input id="r-password" type="password" autocomplete="new-password" required minlength="6" />
+        </div>
+        <button class="btn primary" style="width:100%; margin-top: 4px;" type="submit">Konto erstellen 🃏</button>
+        <p style="text-align:center; color: var(--text-dim); font-size: 0.85rem; margin-top: 12px;">
+          Du startest mit <b style="color: var(--gold-bright);">1000 Credits</b>.
+        </p>
+      </form>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+  <script src="/js/auth.js"></script>
+</body>
+</html>

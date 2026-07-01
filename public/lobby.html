@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>♠ Blackjack Royale — Lobby</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">Blackjack Royale</div>
+    <div class="nav">
+      <span class="user-tag" id="me-name">…</span>
+      <span class="credits" id="me-credits">0</span>
+      <button class="btn small ghost" id="btn-logout">Abmelden</button>
+    </div>
+  </header>
+
+  <main class="lobby-wrap">
+    <section class="lobby-hero">
+      <h1>Wähle deinen Tisch</h1>
+      <p>Tritt einem Spiel bei oder eröffne deinen eigenen Tisch. Bis zu 5 Spieler pro Tisch.</p>
+    </section>
+
+    <div class="lobby-grid">
+      <div class="card">
+        <h2>Offene Tische</h2>
+        <div class="rooms-list" id="rooms-list">
+          <div class="rooms-empty">Lade Tische…</div>
+        </div>
+        <div class="create-row">
+          <input id="room-name" placeholder="Name des neuen Tisches (optional)" maxlength="30" />
+          <button class="btn primary" id="btn-create">Neuen Tisch eröffnen</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Bestenliste</h2>
+        <div class="leaderboard" id="leaderboard">
+          <div class="rooms-empty">Lade Bestenliste…</div>
+        </div>
+
+        <h2 style="margin-top: 28px;">So läuft's</h2>
+        <ul style="color: var(--text-dim); line-height: 1.7; padding-left: 18px; font-size: 0.95rem;">
+          <li>Setze mind. <b style="color:var(--gold-bright);">10</b> Credits pro Runde.</li>
+          <li>Ziel: näher an 21 als der Dealer, ohne zu überkaufen.</li>
+          <li>Blackjack zahlt <b style="color:var(--gold-bright);">3:2</b> aus.</li>
+          <li>Der Dealer zieht bis <b>17</b> und bleibt dann stehen.</li>
+        </ul>
+      </div>
+    </div>
+  </main>
+
+  <div class="toast" id="toast"></div>
+  <script src="/js/lobby.js"></script>
+</body>
+</html>
