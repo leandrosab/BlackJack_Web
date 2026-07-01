@@ -1,3 +1,16 @@
+// Catch startup crashes so Render logs show a real reason.
+process.on('uncaughtException', (err) => {
+  console.error('[FATAL] uncaughtException:', err);
+  process.exit(1);
+});
+process.on('unhandledRejection', (err) => {
+  console.error('[FATAL] unhandledRejection:', err);
+  process.exit(1);
+});
+
+console.log('[boot] starting Blackjack Royale…');
+console.log('[boot] node', process.version, 'cwd', process.cwd());
+
 require('dotenv').config();
 const path = require('path');
 const http = require('http');
@@ -8,6 +21,7 @@ const { Server } = require('socket.io');
 const auth = require('./auth');
 const db = require('./db');
 const rooms = require('./rooms');
+console.log('[boot] modules loaded');
 
 const PORT = process.env.PORT || 3000;
 const app = express();
@@ -18,6 +32,8 @@ rooms.setIo(io);
 app.use(express.json());
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, '..', 'public')));
+
+app.get('/healthz', (_req, res) => res.type('text').send('ok'));
 
 // --- Auth routes ---
 app.post('/api/register', auth.register);
@@ -65,9 +81,8 @@ io.on('connection', (socket) => {
     try {
       const room = rooms.getRoom(roomId);
       if (!room) return socket.emit('error:msg', 'Raum existiert nicht');
-      // Get up-to-date credits from DB
       const dbUser = db.findUserById(socket.user.id);
-      const player = rooms.joinRoom(room, dbUser);
+      rooms.joinRoom(room, dbUser);
       socket.roomId = room.id;
       socket.join(`room:${room.id}`);
       socket.emit('room:joined', { roomId: room.id, chat: room.chat.slice(-30) });
@@ -79,9 +94,7 @@ io.on('connection', (socket) => {
     }
   });
 
-  socket.on('room:leave', () => {
-    handleLeave(socket);
-  });
+  socket.on('room:leave', () => handleLeave(socket));
 
   socket.on('room:bet', ({ amount }) => {
     const room = rooms.getRoom(socket.roomId);
@@ -111,9 +124,7 @@ io.on('connection', (socket) => {
     rooms.chatMessage(room, io, socket.user.username, text);
   });
 
-  socket.on('disconnect', () => {
-    handleLeave(socket);
-  });
+  socket.on('disconnect', () => handleLeave(socket));
 });
 
 function handleLeave(socket) {
@@ -128,12 +139,21 @@ function handleLeave(socket) {
   socket.roomId = null;
 }
 
-// Fallback route for SPA-like navigation
-app.get('*', (req, res, next) => {
-  if (req.path.startsWith('/api/')) return next();
-  res.sendFile(path.join(__dirname, '..', 'public', 'index.html'));
+// SPA fallback — served AFTER static and API routes. Uses app.use (not app.get('*'))
+// because path-to-regexp v6+ no longer accepts a bare '*'.
+app.use((req, res, next) => {
+  if (req.method !== 'GET') return next();
+  if (req.path.startsWith('/api/') || req.path.startsWith('/socket.io/')) return next();
+  res.sendFile(path.join(__dirname, '..', 'public', 'index.html'), (err) => {
+    if (err) next(err);
+  });
 });
 
-server.listen(PORT, () => {
-  console.log(`🃏 Blackjack läuft auf http://localhost:${PORT}`);
+server.on('error', (err) => {
+  console.error('[FATAL] server error:', err);
+  process.exit(1);
+});
+
+server.listen(PORT, '0.0.0.0', () => {
+  console.log(`[boot] Blackjack Royale listening on 0.0.0.0:${PORT}`);
 });

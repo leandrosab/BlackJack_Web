@@ -9,15 +9,20 @@ function ensureDir() {
 }
 
 function load() {
-  ensureDir();
-  if (!fs.existsSync(DB_PATH)) {
-    const initial = { users: [] };
-    fs.writeFileSync(DB_PATH, JSON.stringify(initial, null, 2));
-    return initial;
-  }
   try {
-    return JSON.parse(fs.readFileSync(DB_PATH, 'utf-8'));
-  } catch {
+    ensureDir();
+    if (!fs.existsSync(DB_PATH)) {
+      const initial = { users: [] };
+      fs.writeFileSync(DB_PATH, JSON.stringify(initial, null, 2));
+      console.log('[db] created new database at', DB_PATH);
+      return initial;
+    }
+    const parsed = JSON.parse(fs.readFileSync(DB_PATH, 'utf-8'));
+    console.log('[db] loaded database, users:', parsed.users?.length ?? 0);
+    return parsed;
+  } catch (err) {
+    console.error('[db] load failed at', DB_PATH, '-', err.message);
+    console.warn('[db] falling back to in-memory (data will NOT persist)');
     return { users: [] };
   }
 }
@@ -28,7 +33,11 @@ let saveTimer = null;
 function save() {
   if (saveTimer) return;
   saveTimer = setTimeout(() => {
-    fs.writeFileSync(DB_PATH, JSON.stringify(cache, null, 2));
+    try {
+      fs.writeFileSync(DB_PATH, JSON.stringify(cache, null, 2));
+    } catch (err) {
+      console.error('[db] save failed:', err.message);
+    }
     saveTimer = null;
   }, 100);
 }
