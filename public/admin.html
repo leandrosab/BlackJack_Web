@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="midnight">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin — Blackjack Royale</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+  <div class="shell">
+    <aside id="app-sidebar" class="sidebar"></aside>
+    <main class="main wide">
+      <div class="page-header">
+        <h1>Admin-Panel</h1>
+        <p class="subtitle">Alle User, Online-Status und Credit-Verwaltung.</p>
+      </div>
+
+      <div class="card">
+        <div class="row" style="justify-content: space-between; margin-bottom: 16px;">
+          <h2 style="margin: 0;" id="user-count">Users</h2>
+          <input class="input" id="filter" placeholder="Suchen…" style="max-width: 260px;" />
+        </div>
+        <div style="overflow-x:auto">
+          <table class="data-table" id="user-table">
+            <thead><tr>
+              <th>Status</th><th>User</th><th>Rolle</th><th>Credits</th><th>Ort</th><th>Erstellt</th><th></th>
+            </tr></thead>
+            <tbody id="user-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div class="modal-backdrop" id="credit-modal">
+    <div class="modal">
+      <h2>Credits ändern <button class="close" onclick="app.closeModal('credit-modal')">×</button></h2>
+      <div class="text-muted mb-16" id="cm-user"></div>
+      <div class="field">
+        <label>Betrag (negativ = abziehen)</label>
+        <input class="input" id="cm-delta" type="number" step="100" value="1000" />
+      </div>
+      <div class="row gap-8">
+        <button class="btn small" data-preset="100">+100</button>
+        <button class="btn small" data-preset="1000">+1'000</button>
+        <button class="btn small" data-preset="10000">+10k</button>
+        <button class="btn small" data-preset="100000">+100k</button>
+        <button class="btn small danger" data-preset="-1000">-1'000</button>
+      </div>
+      <button class="btn primary block mt-16" id="btn-apply-credits">Ausführen</button>
+    </div>
+  </div>
+
+  <script src="/js/app.js"></script>
+  <script src="/js/admin.js"></script>
+</body>
+</html>

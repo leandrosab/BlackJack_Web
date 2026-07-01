@@ -62,7 +62,7 @@ async function register(req, res) {
   const user = db.findUserById(id);
   const token = signToken(user);
   setCookie(res, token);
-  res.json({ id: user.id, username: user.username, credits: user.credits });
+  res.json(publicUser(user));
 }
 
 async function login(req, res) {
@@ -77,7 +77,15 @@ async function login(req, res) {
 
   const token = signToken(user);
   setCookie(res, token);
-  res.json({ id: user.id, username: user.username, credits: user.credits });
+  res.json(publicUser(user));
+}
+
+function publicUser(u) {
+  return {
+    id: u.id, username: u.username, credits: u.credits,
+    avatar: u.avatar, theme: u.theme, cardBack: u.cardBack,
+    inventory: u.inventory, role: u.role,
+  };
 }
 
 function logout(req, res) {
@@ -86,7 +94,7 @@ function logout(req, res) {
 }
 
 function me(req, res) {
-  res.json({ id: req.user.id, username: req.user.username, credits: req.user.credits });
+  res.json(publicUser(req.user));
 }
 
 function setCookie(res, token) {

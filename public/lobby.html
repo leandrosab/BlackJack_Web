@@ -1,58 +1,76 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="de" data-theme="midnight">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>♠ Blackjack Royale — Lobby</title>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600;700&display=swap">
+  <title>Tische — Blackjack Royale</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
   <link rel="stylesheet" href="/css/style.css" />
 </head>
 <body>
-  <header class="topbar">
-    <div class="brand">Blackjack Royale</div>
-    <div class="nav">
-      <span class="user-tag" id="me-name">…</span>
-      <span class="credits" id="me-credits">0</span>
-      <button class="btn small ghost" id="btn-logout">Abmelden</button>
-    </div>
-  </header>
+  <div class="shell">
+    <aside id="app-sidebar" class="sidebar"></aside>
 
-  <main class="lobby-wrap">
-    <section class="lobby-hero">
-      <h1>Wähle deinen Tisch</h1>
-      <p>Tritt einem Spiel bei oder eröffne deinen eigenen Tisch. Bis zu 5 Spieler pro Tisch.</p>
-    </section>
-
-    <div class="lobby-grid">
-      <div class="card">
-        <h2>Offene Tische</h2>
-        <div class="rooms-list" id="rooms-list">
-          <div class="rooms-empty">Lade Tische…</div>
-        </div>
-        <div class="create-row">
-          <input id="room-name" placeholder="Name des neuen Tisches (optional)" maxlength="30" />
-          <button class="btn primary" id="btn-create">Neuen Tisch eröffnen</button>
-        </div>
+    <main class="main">
+      <div class="page-header">
+        <h1>Tische</h1>
+        <p class="subtitle">Tritt einem Spiel bei oder eröffne deinen eigenen Tisch.</p>
       </div>
 
-      <div class="card">
-        <h2>Bestenliste</h2>
-        <div class="leaderboard" id="leaderboard">
-          <div class="rooms-empty">Lade Bestenliste…</div>
+      <div class="grid-2">
+        <div class="card">
+          <div class="row" style="justify-content: space-between; margin-bottom: 12px;">
+            <h2 style="margin: 0;">Offene Tische</h2>
+            <button class="btn primary small" onclick="app.openModal('create-modal')">+ Neuer Tisch</button>
+          </div>
+          <div id="rooms-list"><div class="empty">Lade Tische…</div></div>
         </div>
 
-        <h2 style="margin-top: 28px;">So läuft's</h2>
-        <ul style="color: var(--text-dim); line-height: 1.7; padding-left: 18px; font-size: 0.95rem;">
-          <li>Setze mind. <b style="color:var(--gold-bright);">10</b> Credits pro Runde.</li>
-          <li>Ziel: näher an 21 als der Dealer, ohne zu überkaufen.</li>
-          <li>Blackjack zahlt <b style="color:var(--gold-bright);">3:2</b> aus.</li>
-          <li>Der Dealer zieht bis <b>17</b> und bleibt dann stehen.</li>
-        </ul>
-      </div>
-    </div>
-  </main>
+        <div>
+          <div class="card">
+            <h2>Bestenliste</h2>
+            <div id="leaderboard"><div class="empty">Lade…</div></div>
+          </div>
 
-  <div class="toast" id="toast"></div>
+          <div class="card">
+            <h2>Regeln</h2>
+            <ul style="color: var(--text-muted); line-height: 1.8; padding-left: 16px; font-size: 0.9rem;">
+              <li>Min. Einsatz <b class="text-accent">10</b>, Max. <b class="text-accent">500</b></li>
+              <li>Blackjack zahlt <b class="text-accent">3:2</b></li>
+              <li>Dealer zieht bis <b class="text-accent">17</b></li>
+              <li>Bis zu 5 Spieler pro Tisch</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Create Room Modal -->
+  <div class="modal-backdrop" id="create-modal">
+    <div class="modal">
+      <h2>Neuer Tisch <button class="close" onclick="app.closeModal('create-modal')">×</button></h2>
+      <div class="field">
+        <label>Name</label>
+        <input id="new-name" placeholder="Mein Tisch" maxlength="30" />
+      </div>
+      <div class="field">
+        <label>Sichtbarkeit</label>
+        <select id="new-visibility">
+          <option value="public">🌐 Öffentlich — jeder kann beitreten</option>
+          <option value="friends">👥 Nur Freunde des Hosts</option>
+          <option value="password">🔒 Passwort-geschützt</option>
+        </select>
+      </div>
+      <div class="field hidden" id="pw-field">
+        <label>Passwort</label>
+        <input id="new-password" type="text" placeholder="Passwort für den Tisch" maxlength="30" />
+      </div>
+      <button class="btn primary block" id="btn-create-confirm">Tisch eröffnen</button>
+    </div>
+  </div>
+
+  <script src="/js/app.js"></script>
   <script src="/js/lobby.js"></script>
 </body>
 </html>

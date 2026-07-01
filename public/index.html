@@ -1,24 +1,20 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="de" data-theme="midnight">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>♠ Blackjack Royale — Anmelden</title>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600;700&display=swap">
+  <title>Blackjack Royale</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
   <link rel="stylesheet" href="/css/style.css" />
 </head>
 <body>
   <div class="auth-wrap">
-    <div class="hero-cards">
-      <div class="deco"></div>
-      <div class="deco"></div>
-      <div class="deco"></div>
-      <div class="deco"></div>
-    </div>
-
     <div class="auth-card">
-      <h1 class="auth-title">Blackjack Royale</h1>
-      <p class="auth-subtitle">Spiele Blackjack online mit Freunden — mit Fake-Credits.</p>
+      <div class="auth-brand">
+        <div class="logo">♠</div>
+        <h1>Blackjack Royale</h1>
+        <p>Online-Blackjack mit Freunden — mit Fake-Credits.</p>
+      </div>
 
       <div class="tabs">
         <div class="tab active" data-tab="login">Anmelden</div>
@@ -29,34 +25,31 @@
 
       <form id="login-form">
         <div class="field">
-          <label for="l-username">Benutzername</label>
+          <label>Benutzername</label>
           <input id="l-username" type="text" autocomplete="username" required />
         </div>
         <div class="field">
-          <label for="l-password">Passwort</label>
+          <label>Passwort</label>
           <input id="l-password" type="password" autocomplete="current-password" required />
         </div>
-        <button class="btn primary" style="width:100%; margin-top: 4px;" type="submit">Los geht's ♠</button>
+        <button class="btn primary block" type="submit">Los geht's</button>
       </form>
 
       <form id="register-form" class="hidden">
         <div class="field">
-          <label for="r-username">Benutzername (3-16 Zeichen)</label>
+          <label>Benutzername (3–16 Zeichen)</label>
           <input id="r-username" type="text" autocomplete="username" required minlength="3" maxlength="16" />
         </div>
         <div class="field">
-          <label for="r-password">Passwort (min. 6 Zeichen)</label>
+          <label>Passwort (min. 6 Zeichen)</label>
           <input id="r-password" type="password" autocomplete="new-password" required minlength="6" />
         </div>
-        <button class="btn primary" style="width:100%; margin-top: 4px;" type="submit">Konto erstellen 🃏</button>
-        <p style="text-align:center; color: var(--text-dim); font-size: 0.85rem; margin-top: 12px;">
-          Du startest mit <b style="color: var(--gold-bright);">1000 Credits</b>.
-        </p>
+        <button class="btn primary block" type="submit">Konto erstellen</button>
+        <p class="form-hint center mt-16">Start mit <b class="text-accent">1000 Credits</b>.</p>
       </form>
     </div>
   </div>
 
-  <div class="toast" id="toast"></div>
   <script src="/js/auth.js"></script>
 </body>
 </html>

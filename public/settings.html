@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="midnight">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Einstellungen — Blackjack Royale</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+  <div class="shell">
+    <aside id="app-sidebar" class="sidebar"></aside>
+    <main class="main">
+      <div class="page-header">
+        <h1>Einstellungen</h1>
+        <p class="subtitle">Profil, Design und Sicherheit.</p>
+      </div>
+
+      <div class="grid-2">
+        <div>
+          <div class="card">
+            <h2>Profil</h2>
+            <div class="row gap-16" style="align-items: flex-start;">
+              <div id="avatar-preview"></div>
+              <div class="flex1">
+                <div style="font-size: 1.1rem; font-weight: 600;" id="s-username">…</div>
+                <div class="text-muted small" id="s-role">…</div>
+                <div class="text-accent small mt-8" id="s-credits">…</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <h2>Avatar-Farbe</h2>
+            <div id="color-grid" class="swatch-grid"></div>
+          </div>
+
+          <div class="card">
+            <h2>Avatar-Accessoire</h2>
+            <p class="text-muted small mb-16">Freischalten im <a href="/shop.html">Shop</a>.</p>
+            <div id="acc-grid" class="grid-3"></div>
+          </div>
+
+          <div class="card">
+            <h2>Theme</h2>
+            <p class="text-muted small mb-16">Weitere Themes im Shop.</p>
+            <div id="theme-grid" class="grid-3"></div>
+          </div>
+
+          <div class="card">
+            <h2>Kartendesign</h2>
+            <div id="cardback-grid" class="grid-3"></div>
+          </div>
+        </div>
+
+        <div>
+          <div class="card">
+            <h2>Passwort ändern</h2>
+            <div class="field"><label>Aktuelles Passwort</label><input id="pw-current" type="password" /></div>
+            <div class="field"><label>Neues Passwort</label><input id="pw-next" type="password" /></div>
+            <button class="btn primary block" id="btn-pw">Passwort ändern</button>
+          </div>
+
+          <div class="card" style="border-color: rgba(245,114,133,0.25);">
+            <h2 class="text-danger">Konto löschen</h2>
+            <p class="text-muted small mb-16">Alle deine Daten (Credits, Inventar, Freunde) werden entfernt. Nicht rückgängig zu machen.</p>
+            <button class="btn danger block" onclick="app.openModal('del-modal')">Konto löschen</button>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div class="modal-backdrop" id="del-modal">
+    <div class="modal">
+      <h2>Konto löschen <button class="close" onclick="app.closeModal('del-modal')">×</button></h2>
+      <p class="text-muted mb-16">Bitte gib zur Bestätigung dein Passwort ein.</p>
+      <div class="field"><input id="del-pw" type="password" placeholder="Passwort" /></div>
+      <button class="btn danger block" id="btn-del">Endgültig löschen</button>
+    </div>
+  </div>
+
+  <script src="/js/app.js"></script>
+  <script src="/js/settings.js"></script>
+</body>
+</html>

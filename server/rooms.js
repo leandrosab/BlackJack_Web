@@ -11,12 +11,14 @@ const MAX_BET = 500;
 
 const rooms = new Map();
 
-function createRoom({ name, hostId }) {
+function createRoom({ name, hostId, visibility = 'public', password = '' }) {
   const id = crypto.randomBytes(4).toString('hex');
   const room = {
     id,
     name: name || 'Blackjack Tisch',
     hostId,
+    visibility, // 'public' | 'friends' | 'password'
+    password: password ? String(password) : '',
     players: [],
     spectators: [],
     deck: [],
@@ -32,14 +34,27 @@ function createRoom({ name, hostId }) {
   return room;
 }
 
-function listRooms() {
-  return [...rooms.values()].map(r => ({
-    id: r.id,
-    name: r.name,
-    players: r.players.length,
-    phase: r.phase,
-    round: r.round,
-  }));
+function listRooms({ requestingUserId, isAdmin, friendsOf } = {}) {
+  return [...rooms.values()]
+    .filter(r => {
+      if (isAdmin) return true;
+      if (r.visibility === 'public') return true;
+      if (r.visibility === 'password') return true; // shown but locked
+      if (r.visibility === 'friends') {
+        if (r.hostId === requestingUserId) return true;
+        return friendsOf && friendsOf.includes(r.hostId);
+      }
+      return true;
+    })
+    .map(r => ({
+      id: r.id,
+      name: r.name,
+      players: r.players.length,
+      phase: r.phase,
+      round: r.round,
+      visibility: r.visibility,
+      locked: r.visibility === 'password',
+    }));
 }
 
 function getRoom(id) {
@@ -72,6 +87,8 @@ function publicRoomState(room) {
       userId: p.userId,
       username: p.username,
       credits: p.credits,
+      avatar: p.avatar,
+      cardBack: p.cardBack,
       seat: p.seat,
       bet: p.bet,
       cards: p.cards,
@@ -91,15 +108,21 @@ function dealerVisibleScore(room) {
   return game.handScore(room.dealer.cards);
 }
 
-function joinRoom(room, user) {
-  if (room.players.find(p => p.userId === user.id)) {
-    const existing = room.players.find(p => p.userId === user.id);
+function joinRoom(room, user, { password, isAdmin, friendsOfHost } = {}) {
+  if (!isAdmin) {
+    if (room.visibility === 'password' && String(password || '') !== room.password) {
+      throw new Error('Falsches Passwort');
+    }
+    if (room.visibility === 'friends' && user.id !== room.hostId && !friendsOfHost?.includes(user.id)) {
+      throw new Error('Nur Freunde des Hosts können beitreten');
+    }
+  }
+  const existing = room.players.find(p => p.userId === user.id);
+  if (existing) {
     existing.connected = true;
     return existing;
   }
-  if (room.players.length >= MAX_SEATS) {
-    throw new Error('Tisch ist voll');
-  }
+  if (room.players.length >= MAX_SEATS) throw new Error('Tisch ist voll');
   const takenSeats = new Set(room.players.map(p => p.seat));
   let seat = 0;
   while (takenSeats.has(seat)) seat++;
@@ -107,6 +130,8 @@ function joinRoom(room, user) {
     userId: user.id,
     username: user.username,
     credits: user.credits,
+    avatar: user.avatar,
+    cardBack: user.cardBack,
     seat,
     bet: 0,
     cards: [],

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="midnight">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Shop — Blackjack Royale</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+  <div class="shell">
+    <aside id="app-sidebar" class="sidebar"></aside>
+    <main class="main">
+      <div class="page-header">
+        <h1>Shop</h1>
+        <p class="subtitle">Themes, Kartendesigns und Avatar-Accessoires. Spielen um zu kaufen.</p>
+      </div>
+
+      <div class="row gap-8 mb-16">
+        <button class="btn small primary tab-filter" data-cat="all">Alle</button>
+        <button class="btn small tab-filter" data-cat="theme">Themes</button>
+        <button class="btn small tab-filter" data-cat="cardback">Kartendesigns</button>
+        <button class="btn small tab-filter" data-cat="avatar">Avatare</button>
+      </div>
+
+      <div id="items-grid" class="grid-auto"></div>
+    </main>
+  </div>
+
+  <script src="/js/app.js"></script>
+  <script src="/js/shop.js"></script>
+</body>
+</html>

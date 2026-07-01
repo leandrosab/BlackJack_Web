@@ -1,110 +1,101 @@
-const meName = document.getElementById('me-name');
-const meCredits = document.getElementById('me-credits');
-const roomsList = document.getElementById('rooms-list');
-const leaderboard = document.getElementById('leaderboard');
-const btnCreate = document.getElementById('btn-create');
-const btnLogout = document.getElementById('btn-logout');
-const roomNameInput = document.getElementById('room-name');
-const toast = document.getElementById('toast');
+(async function () {
+  const me = await app.loadMe();
+  if (!me) return;
+  app.renderSidebar('lobby');
+  await Promise.all([loadRooms(), loadLeaderboard()]);
+  setInterval(loadRooms, 4000);
+  setInterval(loadLeaderboard, 15000);
+})();
 
-function showToast(msg, type = 'error') {
-  toast.textContent = msg;
-  toast.classList.remove('success', 'error');
-  if (type === 'success') toast.classList.add('success');
-  toast.classList.add('show');
-  setTimeout(() => toast.classList.remove('show'), 2500);
-}
+const roomsListEl = document.getElementById('rooms-list');
+const lbEl = document.getElementById('leaderboard');
+const visSel = document.getElementById('new-visibility');
+const pwField = document.getElementById('pw-field');
 
-async function loadMe() {
+visSel.addEventListener('change', () => {
+  pwField.classList.toggle('hidden', visSel.value !== 'password');
+});
+
+document.getElementById('btn-create-confirm').addEventListener('click', async () => {
+  const btn = document.getElementById('btn-create-confirm');
+  btn.disabled = true;
   try {
-    const res = await fetch('/api/me', { credentials: 'same-origin' });
-    if (!res.ok) { window.location.href = '/'; return; }
-    const user = await res.json();
-    meName.textContent = user.username;
-    meCredits.textContent = user.credits.toLocaleString('de-CH');
-  } catch {
-    window.location.href = '/';
+    const body = {
+      name: document.getElementById('new-name').value,
+      visibility: visSel.value,
+      password: document.getElementById('new-password').value,
+    };
+    const res = await fetch('/api/rooms', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      credentials: 'same-origin', body: JSON.stringify(body),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Fehler');
+    location.href = `/game.html?room=${data.id}`;
+  } catch (err) {
+    app.toast(err.message, 'error');
+    btn.disabled = false;
   }
-}
+});
 
 async function loadRooms() {
   try {
     const res = await fetch('/api/rooms', { credentials: 'same-origin' });
-    if (!res.ok) throw new Error('Fehler');
-    const data = await res.json();
-    if (!data.rooms.length) {
-      roomsList.innerHTML = '<div class="rooms-empty">Noch keine Tische offen — eröffne den ersten! 🃏</div>';
+    if (!res.ok) throw new Error();
+    const { rooms } = await res.json();
+    if (!rooms.length) {
+      roomsListEl.innerHTML = '<div class="empty">Noch keine Tische. Eröffne den ersten!</div>';
       return;
     }
-    roomsList.innerHTML = data.rooms.map(r => `
-      <div class="room-row">
-        <div class="room-info">
-          <h3>${escapeHtml(r.name)}</h3>
-          <div class="meta">Runde ${r.round} · Phase: ${translatePhase(r.phase)} · ${r.players}/5 Spieler</div>
-        </div>
-        <button class="btn primary small" data-join="${r.id}">Beitreten</button>
-      </div>
-    `).join('');
-    roomsList.querySelectorAll('[data-join]').forEach(btn => {
-      btn.addEventListener('click', () => {
-        window.location.href = `/game.html?room=${btn.dataset.join}`;
-      });
-    });
-  } catch (err) {
-    roomsList.innerHTML = '<div class="rooms-empty">Konnte Tische nicht laden.</div>';
+    roomsListEl.innerHTML = rooms.map(r => {
+      const visTag = r.visibility === 'password'
+        ? '<span class="tag password">🔒 Passwort</span>'
+        : r.visibility === 'friends'
+          ? '<span class="tag friends">👥 Nur Freunde</span>'
+          : '<span class="tag public">🌐 Öffentlich</span>';
+      return `
+        <div class="room-row">
+          <div class="info">
+            <h3>${app.escapeHtml(r.name)} ${visTag}</h3>
+            <div class="meta">Runde ${r.round} · ${translatePhase(r.phase)} · ${r.players}/5 Spieler</div>
+          </div>
+          <button class="btn primary small" onclick="joinRoom('${r.id}', ${r.locked ? 'true' : 'false'})">Beitreten</button>
+        </div>`;
+    }).join('');
+  } catch {
+    roomsListEl.innerHTML = '<div class="empty">Konnte Tische nicht laden.</div>';
   }
 }
+
+window.joinRoom = function (id, locked) {
+  if (locked) {
+    const pw = prompt('Passwort für diesen Tisch:');
+    if (!pw) return;
+    location.href = `/game.html?room=${id}&pw=${encodeURIComponent(pw)}`;
+  } else {
+    location.href = `/game.html?room=${id}`;
+  }
+};
 
 async function loadLeaderboard() {
   try {
     const res = await fetch('/api/leaderboard');
-    const data = await res.json();
-    if (!data.users.length) {
-      leaderboard.innerHTML = '<div class="rooms-empty">Noch keine Spieler.</div>';
-      return;
-    }
-    leaderboard.innerHTML = data.users.map((u, i) => {
-      const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `#${i+1}`;
-      return `<div class="leader"><span><span class="rank">${medal}</span>${escapeHtml(u.username)}</span><span class="credits">🪙 ${u.credits.toLocaleString('de-CH')}</span></div>`;
+    const { users } = await res.json();
+    if (!users.length) { lbEl.innerHTML = '<div class="empty">Noch keine Spieler.</div>'; return; }
+    lbEl.innerHTML = users.map((u, i) => {
+      const rank = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `#${i+1}`;
+      return `<div class="leader">
+        <div class="rank">${rank}</div>
+        ${app.avatarHtml({ username: u.username, avatar: u.avatar }, 'sm')}
+        <div class="name">${app.escapeHtml(u.username)}</div>
+        <div class="credits-val">${app.formatCredits(u.credits)}</div>
+      </div>`;
     }).join('');
   } catch {
-    leaderboard.innerHTML = '<div class="rooms-empty">Bestenliste nicht verfügbar.</div>';
+    lbEl.innerHTML = '<div class="empty">Bestenliste nicht verfügbar.</div>';
   }
 }
 
 function translatePhase(p) {
-  return { waiting: 'Wartend', betting: 'Einsätze', playing: 'Spiel läuft', dealer: 'Dealer', settling: 'Auswertung' }[p] || p;
+  return { waiting: 'Warten', betting: 'Einsätze', playing: 'Läuft', dealer: 'Dealer', settling: 'Auswertung' }[p] || p;
 }
-
-function escapeHtml(s) {
-  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-}
-
-btnCreate.addEventListener('click', async () => {
-  btnCreate.disabled = true;
-  try {
-    const res = await fetch('/api/rooms', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'same-origin',
-      body: JSON.stringify({ name: roomNameInput.value }),
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Fehler');
-    window.location.href = `/game.html?room=${data.id}`;
-  } catch (err) {
-    showToast(err.message);
-    btnCreate.disabled = false;
-  }
-});
-
-btnLogout.addEventListener('click', async () => {
-  await fetch('/api/logout', { method: 'POST', credentials: 'same-origin' });
-  window.location.href = '/';
-});
-
-loadMe();
-loadRooms();
-loadLeaderboard();
-setInterval(loadRooms, 4000);
-setInterval(loadLeaderboard, 15000);
