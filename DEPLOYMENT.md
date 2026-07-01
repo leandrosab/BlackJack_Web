@@ -30,7 +30,7 @@ git push -u origin main
    - **Branch**: `main`
    - **Runtime**: `Node`
    - **Build Command**: `npm install`
-   - **Start Command**: `npm start`
+   - **Start Command**: `npm start`  ← ⚠️ *nicht* `node start` — das würde Render nach einer Datei `start.js` suchen lassen!
    - **Instance Type**: **Free**
 4. Unten unter **Environment** → **Add Environment Variable**:
    - Key: `JWT_SECRET` — Value: einen langen Zufallsstring, z.B. mit `openssl rand -hex 32` erzeugen
