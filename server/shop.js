@@ -31,12 +31,21 @@ const CATALOG = [
   { id: 'avatar:rocket',     kind: 'avatar', name: 'Rocket 🚀',     price: 5000,  tier: 'rare',      emoji: '🚀' },
 ];
 
-function catalog() { return CATALOG; }
+function catalog(db) {
+  if (!db) return CATALOG;
+  const custom = db.customItems();
+  return [...CATALOG, ...custom];
+}
 
-function findItem(id) { return CATALOG.find(i => i.id === id); }
+function findItem(id, db) {
+  const built = CATALOG.find(i => i.id === id);
+  if (built) return built;
+  if (db) return db.customItems().find(i => i.id === id);
+  return null;
+}
 
 function buy(user, itemId, db) {
-  const item = findItem(itemId);
+  const item = findItem(itemId, db);
   if (!item) throw new Error('Unbekannter Artikel');
   if ((user.inventory || []).includes(itemId)) throw new Error('Bereits gekauft');
   if (user.credits < item.price) throw new Error('Nicht genug Credits');

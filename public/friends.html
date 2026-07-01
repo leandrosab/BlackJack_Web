@@ -54,6 +54,21 @@
     </main>
   </div>
 
+  <div class="modal-backdrop" id="send-modal">
+    <div class="modal">
+      <h2>💸 Credits senden <button class="close" onclick="app.closeModal('send-modal')">×</button></h2>
+      <div class="text-muted mb-16" id="send-target"></div>
+      <div class="field"><label>Betrag</label><input class="input" id="send-amount" type="number" min="1" step="100" value="500" /></div>
+      <div class="row gap-8">
+        <button class="btn small" data-preset="100">100</button>
+        <button class="btn small" data-preset="500">500</button>
+        <button class="btn small" data-preset="1000">1'000</button>
+        <button class="btn small" data-preset="5000">5'000</button>
+      </div>
+      <button class="btn primary block mt-16" id="btn-send-credits">Senden</button>
+    </div>
+  </div>
+
   <script src="/socket.io/socket.io.js"></script>
   <script src="/js/app.js"></script>
   <script src="/js/friends.js"></script>

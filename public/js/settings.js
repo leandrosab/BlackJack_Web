@@ -31,7 +31,52 @@ function renderProfile() {
   document.getElementById('s-username').textContent = me.username;
   document.getElementById('s-role').textContent = me.role === 'admin' ? 'Administrator' : 'Spieler';
   document.getElementById('s-credits').textContent = '◆ ' + app.formatCredits(me.credits);
+
+  const s = me.stats || { rounds: 0, wins: 0, losses: 0, pushes: 0, blackjacks: 0 };
+  const winRate = s.rounds > 0 ? Math.round((s.wins / s.rounds) * 100) : 0;
+  document.getElementById('stats-grid').innerHTML = `
+    ${statTile('Runden', s.rounds)}
+    ${statTile('Wins', s.wins, 'success')}
+    ${statTile('Losses', s.losses, 'danger')}
+    ${statTile('Blackjacks', s.blackjacks, 'accent')}
+    ${statTile('Winrate', winRate + '%')}
+  `;
+
+  const btn = document.getElementById('btn-daily');
+  const DAY_MS = 24 * 60 * 60 * 1000;
+  const nextIn = (me.lastDailyClaim || 0) + DAY_MS - Date.now();
+  if (nextIn > 0) {
+    const h = Math.floor(nextIn / 3600000);
+    const m = Math.floor((nextIn % 3600000) / 60000);
+    btn.textContent = `🎁 In ${h}h ${m}m`;
+    btn.disabled = true;
+  } else {
+    btn.textContent = '🎁 Daily Bonus';
+    btn.disabled = false;
+  }
 }
+
+function statTile(label, value, tone = '') {
+  const color = tone === 'success' ? 'var(--success)' : tone === 'danger' ? 'var(--danger)' : tone === 'accent' ? 'var(--accent)' : 'var(--text)';
+  return `<div style="background:var(--surface-2);padding:10px 6px;border-radius:8px;">
+    <div style="font-size:1.2rem;font-weight:700;color:${color};">${value}</div>
+    <div class="tiny text-muted">${label}</div>
+  </div>`;
+}
+
+document.addEventListener('click', async (e) => {
+  if (e.target?.id === 'btn-daily') {
+    try {
+      const res = await fetch('/api/daily', { method: 'POST', credentials: 'same-origin' });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      me = await (await fetch('/api/me', { credentials: 'same-origin' })).json();
+      app.renderSidebar('settings');
+      renderProfile();
+      app.toast(`+${data.reward} Credits geholt!`, 'success');
+    } catch (err) { app.toast(err.message, 'error'); }
+  }
+});
 
 function renderColorGrid() {
   const el = document.getElementById('color-grid');

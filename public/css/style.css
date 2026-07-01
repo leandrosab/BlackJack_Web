@@ -204,15 +204,43 @@ a:hover { color: var(--accent-hover); }
 .main { padding: 32px 40px; max-width: 1200px; width: 100%; }
 .main.wide { max-width: none; }
 
-@media (max-width: 800px) {
+/* ≤ 1080px: compact sidebar (icons only, still vertical) */
+@media (max-width: 1080px) {
+  .shell { grid-template-columns: 72px 1fr; }
+  .sidebar { padding: 20px 8px; }
+  .sidebar .brand { justify-content: center; padding: 8px 0 20px; }
+  .sidebar .brand span:not(.logo) { display: none; }
+  .sidebar nav a { justify-content: center; padding: 10px; position: relative; }
+  .sidebar nav a .label { display: none; }
+  .sidebar nav a .badge { position: absolute; top: 4px; right: 4px; margin: 0; }
+  .sidebar .user-pill { padding: 6px; justify-content: center; }
+  .sidebar .user-pill .info { display: none; }
+  .main { padding: 24px 24px 40px; }
+}
+
+/* ≤ 720px: top-bar layout */
+@media (max-width: 720px) {
   .shell { grid-template-columns: 1fr; }
-  .sidebar { position: static; height: auto; flex-direction: row; overflow-x: auto; padding: 12px; }
-  .sidebar .brand { padding: 0 12px 0 4px; }
-  .sidebar nav { flex-direction: row; }
+  .sidebar {
+    position: sticky; top: 0; height: auto;
+    flex-direction: row; align-items: center; gap: 6px;
+    padding: 10px 12px; overflow-x: auto;
+    z-index: 30;
+  }
+  .sidebar .brand { padding: 0 6px 0 0; flex-shrink: 0; }
+  .sidebar nav {
+    flex-direction: row; flex: 1;
+    gap: 2px; align-items: center;
+    min-width: 0;
+  }
   .sidebar nav a { padding: 8px 10px; }
-  .sidebar nav a .label, .sidebar .user-pill .info { display: none; }
-  .sidebar .user-pill { padding: 6px; }
-  .main { padding: 20px; }
+  .sidebar .user-pill {
+    margin: 0 0 0 auto; padding: 4px;
+    flex-shrink: 0; gap: 6px;
+  }
+  .main { padding: 18px 16px 40px; }
+  h1 { font-size: 1.4rem; }
+  h2 { font-size: 1.05rem; }
 }
 
 /* ==================
@@ -235,9 +263,10 @@ h3 { font-size: 1rem; font-weight: 600; }
 
 .grid-2 { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
 .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
-.grid-auto { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; }
-@media (max-width: 900px) { .grid-2 { grid-template-columns: 1fr; } .grid-3 { grid-template-columns: 1fr 1fr; } }
-@media (max-width: 600px) { .grid-3 { grid-template-columns: 1fr; } }
+.grid-auto { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 14px; }
+@media (max-width: 1080px) { .grid-2 { grid-template-columns: 1fr; } }
+@media (max-width: 720px) { .grid-3 { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 480px) { .grid-3 { grid-template-columns: 1fr; } .grid-auto { grid-template-columns: 1fr; } }
 
 /* Buttons */
 .btn {
@@ -452,7 +481,31 @@ h3 { font-size: 1rem; font-weight: 600; }
 .game-body {
   flex: 1; display: grid; grid-template-columns: 1fr 300px; gap: 20px; padding: 20px;
 }
-@media (max-width: 900px) { .game-body { grid-template-columns: 1fr; } }
+@media (max-width: 900px) {
+  .game-body { grid-template-columns: 1fr; padding: 14px; gap: 14px; }
+  .felt { padding: 20px 14px 30px; min-height: auto; border-radius: 12px; }
+  .card-el { width: 52px; height: 72px; margin-left: -18px; }
+  .card-el .rank { font-size: 0.85rem; }
+  .card-el .suit { font-size: 0.75rem; top: 20px; }
+  .card-el .center { font-size: 1.4rem; }
+  .card-el .rank-br { font-size: 0.85rem; }
+  .seat { min-width: 140px; max-width: 165px; padding: 10px; }
+  .seat .cards { min-height: 74px; }
+  .chip { width: 42px; height: 42px; font-size: 0.72rem; }
+  .game-top { padding: 10px 14px; }
+  .game-top .title { font-size: 0.9rem; }
+  .actions .btn { padding: 8px 12px; font-size: 0.85rem; }
+  .players-area { gap: 8px; }
+  .chat-card { min-height: 300px; }
+  .chat-log { max-height: 300px; }
+}
+@media (max-width: 480px) {
+  .card-el { width: 44px; height: 62px; margin-left: -15px; }
+  .card-el .center { font-size: 1.1rem; }
+  .seat { min-width: 130px; padding: 8px; }
+  .chip { width: 38px; height: 38px; }
+  .bet-total { padding: 5px 12px; font-size: 0.82rem; }
+}
 .felt {
   background: linear-gradient(180deg, var(--felt), var(--felt-2));
   border: 1px solid var(--border-strong);
@@ -615,7 +668,12 @@ h3 { font-size: 1rem; font-weight: 600; }
 .data-table { width: 100%; border-collapse: collapse; }
 .data-table th, .data-table td {
   text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--border);
-  font-size: 0.9rem;
+  font-size: 0.9rem; white-space: nowrap;
+}
+@media (max-width: 720px) {
+  .data-table th, .data-table td { padding: 8px 10px; font-size: 0.82rem; }
+  .modal { padding: 20px 18px; }
+  .card { padding: 18px 16px; }
 }
 .data-table th { color: var(--text-muted); font-weight: 500; font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.05em; }
 .data-table tr:hover { background: var(--surface-2); }

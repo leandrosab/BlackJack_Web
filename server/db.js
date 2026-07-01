@@ -19,6 +19,8 @@ const USER_DEFAULTS = {
   friendRequests: [],
   blocked: [],
   createdAt: 0,
+  lastDailyClaim: 0,
+  stats: { rounds: 0, wins: 0, losses: 0, pushes: 0, blackjacks: 0 },
 };
 
 function migrateUser(u) {
@@ -32,7 +34,7 @@ function load() {
   try {
     ensureDir();
     if (!fs.existsSync(DB_PATH)) {
-      const initial = { users: [], messages: {} };
+      const initial = { users: [], messages: {}, customItems: [] };
       fs.writeFileSync(DB_PATH, JSON.stringify(initial, null, 2));
       console.log('[db] created new database at', DB_PATH);
       return initial;
@@ -40,12 +42,13 @@ function load() {
     const parsed = JSON.parse(fs.readFileSync(DB_PATH, 'utf-8'));
     parsed.users = (parsed.users || []).map(migrateUser);
     parsed.messages = parsed.messages || {};
-    console.log('[db] loaded database, users:', parsed.users.length);
+    parsed.customItems = parsed.customItems || [];
+    console.log('[db] loaded database, users:', parsed.users.length, 'custom items:', parsed.customItems.length);
     return parsed;
   } catch (err) {
     console.error('[db] load failed at', DB_PATH, '-', err.message);
     console.warn('[db] falling back to in-memory (data will NOT persist)');
-    return { users: [], messages: {} };
+    return { users: [], messages: {}, customItems: [] };
   }
 }
 
@@ -132,8 +135,31 @@ function addMessage(fromId, toId, text) {
   return { from: fromId, to: toId, text, at };
 }
 
+// ---- Custom shop items ----
+function customItems() { return cache.customItems || []; }
+function addCustomItem(item) {
+  cache.customItems ||= [];
+  cache.customItems.push(item);
+  save();
+  return item;
+}
+function removeCustomItem(id) {
+  const before = (cache.customItems || []).length;
+  cache.customItems = (cache.customItems || []).filter(i => i.id !== id);
+  const removed = before !== cache.customItems.length;
+  if (removed) {
+    // Also strip from every user's inventory (item vanishes cleanly)
+    for (const u of cache.users) {
+      if (u.inventory?.includes(id)) u.inventory = u.inventory.filter(x => x !== id);
+    }
+    save();
+  }
+  return removed;
+}
+
 module.exports = {
   findUserByName, findUserById, createUser, updateUser, updateCredits, deleteUser,
   allUsers, topUsers,
   getConversation, addMessage,
+  customItems, addCustomItem, removeCustomItem,
 };

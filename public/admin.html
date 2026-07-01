@@ -16,7 +16,12 @@
         <p class="subtitle">Alle User, Online-Status und Credit-Verwaltung.</p>
       </div>
 
-      <div class="card">
+      <div class="row gap-8 mb-16">
+        <button class="btn small primary" data-panel="users">👥 Users</button>
+        <button class="btn small" data-panel="shop">🛍️ Shop-Items</button>
+      </div>
+
+      <div class="card" id="panel-users">
         <div class="row" style="justify-content: space-between; margin-bottom: 16px;">
           <h2 style="margin: 0;" id="user-count">Users</h2>
           <input class="input" id="filter" placeholder="Suchen…" style="max-width: 260px;" />
@@ -29,6 +34,28 @@
             <tbody id="user-tbody"></tbody>
           </table>
         </div>
+      </div>
+
+      <div class="card hidden" id="panel-shop">
+        <h2>Custom Shop-Item hinzufügen</h2>
+        <p class="text-muted small mb-16">Nur Avatar-Accessoires (Emoji). Erscheint sofort im Shop für alle User.</p>
+        <div class="grid-3">
+          <div class="field"><label>Name</label><input class="input" id="ci-name" placeholder="z.B. Party-Hut" maxlength="40" /></div>
+          <div class="field"><label>Emoji</label><input class="input" id="ci-emoji" placeholder="🎉" maxlength="8" /></div>
+          <div class="field"><label>Preis (Credits)</label><input class="input" id="ci-price" type="number" min="0" step="100" value="1000" /></div>
+        </div>
+        <div class="field">
+          <label>Seltenheit</label>
+          <select class="input" id="ci-tier">
+            <option value="basic">Basic</option>
+            <option value="rare">Rare</option>
+            <option value="legendary">Legendary</option>
+          </select>
+        </div>
+        <button class="btn primary" id="btn-create-item">Hinzufügen</button>
+
+        <h2 class="mt-24">Existierende Custom Items</h2>
+        <div id="custom-items"><div class="empty">Noch keine.</div></div>
       </div>
     </main>
   </div>

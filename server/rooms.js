@@ -334,17 +334,22 @@ function settleRound(room, io) {
     if (p.bet <= 0) continue;
     const outcome = game.settleOutcome(p.cards, room.dealer.cards);
     const mult = game.payoutMultiplier(outcome);
-    // credits changes: winnings = bet + bet*mult; but bet already deducted at placeBet.
-    // On win: credits += bet + bet*mult (returns bet + profit)
-    // On push: credits += bet (return stake)
-    // On lose: nothing (bet lost)
-    if (outcome === 'push') {
-      p.credits += p.bet;
-    } else if (mult > 0) {
-      p.credits += p.bet + Math.floor(p.bet * mult);
-    }
+    if (outcome === 'push') p.credits += p.bet;
+    else if (mult > 0) p.credits += p.bet + Math.floor(p.bet * mult);
     p.lastResult = outcome;
-    db.updateCredits(p.userId, p.credits);
+    // Update user record + stats
+    const dbUser = db.findUserById(p.userId);
+    if (dbUser) {
+      const stats = dbUser.stats || { rounds: 0, wins: 0, losses: 0, pushes: 0, blackjacks: 0 };
+      stats.rounds += 1;
+      if (outcome === 'blackjack') { stats.wins += 1; stats.blackjacks += 1; }
+      else if (outcome === 'win') stats.wins += 1;
+      else if (outcome === 'push') stats.pushes += 1;
+      else if (outcome === 'lose') stats.losses += 1;
+      db.updateUser(p.userId, { credits: p.credits, stats });
+    } else {
+      db.updateCredits(p.userId, p.credits);
+    }
   }
   room.phaseEndsAt = Date.now() + RESULT_TIME_MS;
   broadcastState(room, io);

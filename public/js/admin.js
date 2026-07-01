@@ -1,4 +1,5 @@
 let users = [];
+let customItems = [];
 let editing = null;
 
 (async function () {
@@ -8,8 +9,76 @@ let editing = null;
   app.renderSidebar('admin');
   await load();
   render();
+  await loadCustomItems();
+  renderCustomItems();
   setInterval(async () => { await load(); render(); }, 8000);
+  wirePanelTabs();
 })();
+
+function wirePanelTabs() {
+  document.querySelectorAll('[data-panel]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const key = btn.dataset.panel;
+      document.querySelectorAll('[data-panel]').forEach(b => b.classList.toggle('primary', b === btn));
+      document.getElementById('panel-users').classList.toggle('hidden', key !== 'users');
+      document.getElementById('panel-shop').classList.toggle('hidden', key !== 'shop');
+    });
+  });
+}
+
+async function loadCustomItems() {
+  const res = await fetch('/api/shop', { credentials: 'same-origin' });
+  const data = await res.json();
+  customItems = data.items.filter(i => i.custom);
+}
+
+function renderCustomItems() {
+  const el = document.getElementById('custom-items');
+  if (!customItems.length) { el.innerHTML = '<div class="empty">Noch keine Custom Items.</div>'; return; }
+  el.innerHTML = customItems.map(it => `
+    <div class="room-row">
+      <div style="font-size:1.6rem">${it.emoji}</div>
+      <div class="info">
+        <h3>${app.escapeHtml(it.name)} <span class="tag tier-${it.tier}">${it.tier}</span></h3>
+        <div class="meta">◆ ${app.formatCredits(it.price)}</div>
+      </div>
+      <button class="btn small danger" data-del-item="${it.id}">Löschen</button>
+    </div>
+  `).join('');
+  el.querySelectorAll('[data-del-item]').forEach(b => b.addEventListener('click', async () => {
+    if (!confirm('Item wirklich löschen? (wird aus allen Inventaren entfernt)')) return;
+    try {
+      const res = await fetch('/api/admin/shop/' + encodeURIComponent(b.dataset.delItem), {
+        method: 'DELETE', credentials: 'same-origin',
+      });
+      if (!res.ok) throw new Error((await res.json()).error);
+      await loadCustomItems(); renderCustomItems();
+      app.toast('Gelöscht', 'success');
+    } catch (err) { app.toast(err.message, 'error'); }
+  }));
+}
+
+document.addEventListener('click', async (e) => {
+  if (e.target?.id !== 'btn-create-item') return;
+  const body = {
+    name: document.getElementById('ci-name').value,
+    emoji: document.getElementById('ci-emoji').value,
+    price: document.getElementById('ci-price').value,
+    tier: document.getElementById('ci-tier').value,
+  };
+  try {
+    const res = await fetch('/api/admin/shop', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      credentials: 'same-origin', body: JSON.stringify(body),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error);
+    document.getElementById('ci-name').value = '';
+    document.getElementById('ci-emoji').value = '';
+    app.toast('Item erstellt', 'success');
+    await loadCustomItems(); renderCustomItems();
+  } catch (err) { app.toast(err.message, 'error'); }
+});
 
 async function load() {
   const res = await fetch('/api/admin/users', { credentials: 'same-origin' });

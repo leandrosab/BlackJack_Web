@@ -65,6 +65,8 @@ function publicUser(u) {
     id: u.id, username: u.username, credits: u.credits,
     avatar: u.avatar, theme: u.theme, cardBack: u.cardBack,
     inventory: u.inventory, role: u.role,
+    stats: u.stats || { rounds: 0, wins: 0, losses: 0, pushes: 0, blackjacks: 0 },
+    lastDailyClaim: u.lastDailyClaim || 0,
   };
 }
 
@@ -114,7 +116,7 @@ app.delete('/api/settings/account', auth.authMiddleware, async (req, res) => {
 // ---- Shop ----
 app.get('/api/shop', auth.authMiddleware, (req, res) => {
   res.json({
-    items: shop.catalog(),
+    items: shop.catalog(db),
     inventory: req.user.inventory || [],
     credits: req.user.credits,
   });
@@ -124,6 +126,43 @@ app.post('/api/shop/buy', auth.authMiddleware, (req, res) => {
     const result = shop.buy(req.user, String(req.body?.id), db);
     res.json(result);
   } catch (err) { res.status(400).json({ error: err.message }); }
+});
+
+// ---- Daily Bonus ----
+app.post('/api/daily', auth.authMiddleware, (req, res) => {
+  const DAY_MS = 24 * 60 * 60 * 1000;
+  const now = Date.now();
+  const last = req.user.lastDailyClaim || 0;
+  if (now - last < DAY_MS) {
+    const wait = DAY_MS - (now - last);
+    return res.status(429).json({ error: 'Zu früh', waitMs: wait });
+  }
+  const reward = 250;
+  const credits = (req.user.credits || 0) + reward;
+  db.updateUser(req.user.id, { credits, lastDailyClaim: now });
+  res.json({ reward, credits, next: now + DAY_MS });
+});
+
+// ---- Credit Transfer to friend ----
+app.post('/api/credits/transfer', auth.authMiddleware, (req, res) => {
+  const { toId, amount } = req.body || {};
+  const amt = Math.floor(Number(amount));
+  if (!Number.isFinite(amt) || amt <= 0) return res.status(400).json({ error: 'Ungültiger Betrag' });
+  if (amt > 100000) return res.status(400).json({ error: 'Max. 100\'000 pro Transfer' });
+  if (!(req.user.friends || []).includes(String(toId))) return res.status(403).json({ error: 'Nur an Freunde' });
+  const other = db.findUserById(String(toId));
+  if (!other) return res.status(404).json({ error: 'Empfänger nicht gefunden' });
+  if (req.user.credits < amt) return res.status(400).json({ error: 'Nicht genug Credits' });
+  const senderNew = req.user.credits - amt;
+  const receiverNew = (other.credits || 0) + amt;
+  db.updateCredits(req.user.id, senderNew);
+  db.updateCredits(other.id, receiverNew);
+  io.to(`user:${other.id}`).emit('credits:update', { credits: receiverNew });
+  io.to(`user:${other.id}`).emit('dm:new', {
+    from: req.user.id, to: other.id, text: `💸 Du hast ${amt} Credits von ${req.user.username} erhalten.`, at: Date.now(),
+    system: true,
+  });
+  res.json({ credits: senderNew });
 });
 
 // ---- Friends ----
@@ -226,6 +265,35 @@ app.delete('/api/admin/user/:id', auth.authMiddleware, adminOnly, (req, res) => 
   if (!target) return res.status(404).json({ error: 'Nicht gefunden' });
   if (target.role === 'admin') return res.status(403).json({ error: 'Admin nicht löschbar' });
   db.deleteUser(target.id);
+  res.json({ ok: true });
+});
+
+app.post('/api/admin/shop', auth.authMiddleware, adminOnly, (req, res) => {
+  const { name, price, emoji, tier } = req.body || {};
+  const cleanName = String(name || '').trim().slice(0, 40);
+  const cleanEmoji = String(emoji || '').trim().slice(0, 8);
+  const cleanPrice = Math.max(0, Math.floor(Number(price)));
+  const okTier = ['basic', 'rare', 'legendary'].includes(tier) ? tier : 'basic';
+  if (!cleanName || !cleanEmoji || !Number.isFinite(cleanPrice)) {
+    return res.status(400).json({ error: 'Name, Emoji und Preis erforderlich' });
+  }
+  const shortId = crypto.randomBytes(4).toString('hex');
+  const item = {
+    id: `avatar:custom-${shortId}`,
+    kind: 'avatar',
+    name: cleanName,
+    price: cleanPrice,
+    tier: okTier,
+    emoji: cleanEmoji,
+    custom: true,
+  };
+  db.addCustomItem(item);
+  res.json(item);
+});
+
+app.delete('/api/admin/shop/:id', auth.authMiddleware, adminOnly, (req, res) => {
+  const ok = db.removeCustomItem(req.params.id);
+  if (!ok) return res.status(404).json({ error: 'Nicht gefunden' });
   res.json({ ok: true });
 });
 

@@ -79,6 +79,7 @@ function renderFriends() {
         ${f.online ? (f.roomId ? `<div class="roomtag">🃏 In Raum</div>` : '<div class="roomtag">Online</div>') : '<div class="tiny text-muted">Offline</div>'}
       </div>
       <span class="status ${f.online ? 'online' : ''}"></span>
+      <button class="btn small ghost" data-send="${f.id}" title="Credits senden">💸</button>
       <button class="btn small ghost" data-remove="${f.id}" title="Freund entfernen">×</button>
     </div>
   `).join('');
@@ -86,11 +87,43 @@ function renderFriends() {
     if (e.target.tagName === 'BUTTON') return;
     openDm(row.dataset.open);
   }));
+  el.querySelectorAll('[data-send]').forEach(b => b.addEventListener('click', (e) => {
+    e.stopPropagation();
+    openSendCredits(b.dataset.send);
+  }));
   el.querySelectorAll('[data-remove]').forEach(b => b.addEventListener('click', (e) => {
     e.stopPropagation();
     if (confirm('Freund entfernen?')) act('remove', b.dataset.remove);
   }));
 }
+
+let sendTarget = null;
+function openSendCredits(friendId) {
+  sendTarget = friends.find(f => f.id === friendId);
+  if (!sendTarget) return;
+  document.getElementById('send-target').textContent = `An ${sendTarget.username} — du hast ◆ ${app.formatCredits(me.credits)}`;
+  document.getElementById('send-amount').value = 500;
+  app.openModal('send-modal');
+}
+document.querySelectorAll('#send-modal [data-preset]').forEach(b => {
+  b.addEventListener('click', () => { document.getElementById('send-amount').value = b.dataset.preset; });
+});
+document.getElementById('btn-send-credits').addEventListener('click', async () => {
+  const amount = parseInt(document.getElementById('send-amount').value, 10);
+  if (!sendTarget || !Number.isFinite(amount) || amount <= 0) return;
+  try {
+    const res = await fetch('/api/credits/transfer', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      credentials: 'same-origin', body: JSON.stringify({ toId: sendTarget.id, amount }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error);
+    me.credits = data.credits;
+    app.renderSidebar('friends');
+    app.closeModal('send-modal');
+    app.toast(`${amount} Credits an ${sendTarget.username} gesendet`, 'success');
+  } catch (err) { app.toast(err.message, 'error'); }
+});
 
 document.getElementById('btn-add').addEventListener('click', async () => {
   const username = document.getElementById('add-name').value.trim();
