@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Tisch — Blackjack Royale</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
-  <link rel="stylesheet" href="/css/style.css" />
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" /><link rel="stylesheet" href="/css/style.css" />
 </head>
 <body>
   <div class="game-shell">
@@ -39,8 +39,10 @@
             <div class="chip c50" data-chip="50">50</div>
             <div class="chip c100" data-chip="100">100</div>
             <div class="chip c250" data-chip="250">250</div>
+            <div class="chip c1000" data-chip="1000">1K</div>
             <div class="bet-total"><span id="bet-total">0</span></div>
             <button class="btn small" id="btn-clear-bet">Reset</button>
+            <button class="btn small" id="btn-all-in" style="border-color: var(--danger); color: var(--danger);">🔥 All-In</button>
             <button class="btn primary small" id="btn-place-bet">Setzen</button>
           </div>
           <div class="actions hidden" id="turn-actions">

@@ -68,6 +68,13 @@ document.getElementById('btn-place-bet').addEventListener('click', () => {
   if (pendingBet < 10) return app.toast('Min. Einsatz: 10', 'error');
   socket.emit('room:bet', { amount: pendingBet });
 });
+document.getElementById('btn-all-in').addEventListener('click', () => {
+  if (me.credits < 10) return app.toast('Nicht genug Credits für einen Einsatz', 'error');
+  if (!confirm(`All-In! Wirklich alle ${app.formatCredits(me.credits)} Credits setzen?`)) return;
+  pendingBet = me.credits;
+  betTotalEl.textContent = pendingBet;
+  socket.emit('room:bet', { amount: me.credits });
+});
 
 turnActions.querySelectorAll('[data-action]').forEach(btn => {
   btn.addEventListener('click', () => socket.emit('room:action', { action: btn.dataset.action }));

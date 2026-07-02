@@ -55,5 +55,5 @@ Siehe [DEPLOYMENT.md](DEPLOYMENT.md) für eine Schritt-für-Schritt-Anleitung zu
 - **Blackjack** (Ass + 10er in ersten 2 Karten) zahlt 3:2.
 - **Hit** = weitere Karte. **Stand** = passen. **Double** = Einsatz verdoppeln + genau 1 Karte.
 - Dealer zieht bis 17 und bleibt dann stehen.
-- Min. Einsatz: 10, Max. Einsatz: 500.
+- Min. Einsatz: 10, kein Maximum (nur begrenzt durch dein Guthaben).
 - Timer: 20s zum Setzen, 25s pro Zug.

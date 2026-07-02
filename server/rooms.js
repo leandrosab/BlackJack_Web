@@ -7,7 +7,7 @@ const BET_TIME_MS = 20000;
 const TURN_TIME_MS = 25000;
 const RESULT_TIME_MS = 6000;
 const MIN_BET = 10;
-const MAX_BET = 500;
+const MAX_BET = Number.MAX_SAFE_INTEGER;
 
 const rooms = new Map();
 
@@ -173,7 +173,6 @@ function placeBet(room, userId, amount) {
   if (!player) throw new Error('Nicht am Tisch');
   amount = Math.floor(Number(amount));
   if (!Number.isFinite(amount) || amount < MIN_BET) throw new Error(`Min. Einsatz: ${MIN_BET}`);
-  if (amount > MAX_BET) throw new Error(`Max. Einsatz: ${MAX_BET}`);
   // refund previous bet first
   const previous = player.bet || 0;
   const available = player.credits + previous;
